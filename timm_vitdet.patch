@@ -1,0 +1,34 @@
+diff --git a/timm/models/vision_transformer_sam.py b/timm/models/vision_transformer_sam.py
+index b3b74aa3..ed25cae2 100644
+--- a/timm/models/vision_transformer_sam.py
++++ b/timm/models/vision_transformer_sam.py
+@@ -152,18 +152,19 @@ class Attention(nn.Module):
+         x = x.reshape(B, N, -1)
+         qkv = self.qkv(x).view(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+         # qkv with shape (3, B, nHead, H * W, C)
+-        q, k, v = qkv.reshape(3, B * self.num_heads, N, -1).unbind(0)
++        # q, k, v = qkv.reshape(3, B * self.num_heads, N, -1).unbind(0)
++        q, k, v = qkv.unbind(0)
+         # q, k, v with shape (B * nHead, H * W, C)
+         q, k = self.q_norm(q), self.k_norm(k)
+ 
+-        if self.use_rel_pos:
+-            attn_bias = get_decomposed_rel_pos_bias(q, self.rel_pos_h, self.rel_pos_w, (H, W), (H, W))
+-        else:
+-            attn_bias = None
+-            if self.rope is not None:
+-                rope = self.rope.get_embed()
+-                q = apply_rot_embed_cat(q, rope).type_as(v)
+-                k = apply_rot_embed_cat(k, rope).type_as(v)
++        # if self.use_rel_pos:
++        #     attn_bias = get_decomposed_rel_pos_bias(q, self.rel_pos_h, self.rel_pos_w, (H, W), (H, W))
++        # else:
++        #     attn_bias = None
++        #     if self.rope is not None:
++        #         rope = self.rope.get_embed()
++        #         q = apply_rot_embed_cat(q, rope).type_as(v)
++        #         k = apply_rot_embed_cat(k, rope).type_as(v)
++        attn_bias = None
+ 
+         if self.fused_attn:
+             x = torch.nn.functional.scaled_dot_product_attention(
